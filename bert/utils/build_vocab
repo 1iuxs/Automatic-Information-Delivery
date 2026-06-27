@@ -1,0 +1,29 @@
+
+from tqdm import tqdm
+def build_vocab(file_path, tokenizer, max_size, min_freq):
+    vocab_dic = {}
+    with open(file_path, "r", encoding="UTF-8") as f:
+        for line in tqdm(f):
+            lin = line.strip()
+            if not lin:
+                continue
+            content = lin.split("\t")[0]
+            for word in tokenizer(content):
+                vocab_dic[word] = vocab_dic.get(word, 0) + 1
+    # 过滤低频词，并按词频降序排序
+    vocab_list = sorted(
+        [_ for _ in vocab_dic.items() if _[1] >= min_freq],
+        key=lambda x: x[1],
+        reverse=True
+    )[:max_size]
+    # 截断到最大词表容量
+    vocab_list = vocab_list[:max_size]
+    # 构建 word -> id 映射
+    vocab_dic = {word_count[0]: idx for idx, word_count in enumerate(vocab_list)}
+    # 添加未知、填充符号
+    vocab_dic.update({"UNK": len(vocab_dic), "PAD": len(vocab_dic) + 1})
+    return vocab_dic
+
+
+
+
